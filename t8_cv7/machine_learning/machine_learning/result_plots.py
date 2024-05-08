@@ -1,10 +1,21 @@
 import numpy as np
 from matplotlib import pyplot as plt
 import seaborn as sns
+import os
 
 class Plotter:
     """A class for plotting the results of machine learning experiments."""
 
+    def __init__(self, output_dir):
+        """
+        Initialize the Plotter with the output directory for saving plots.
+
+        Parameters:
+        - output_dir: Directory where the plots will be saved.
+        """
+        self.output_dir = output_dir
+        os.makedirs(self.output_dir, exist_ok=True)  # Create the output directory if it doesn't exist
+        self.plot_counter = 0
     def plot_metric_density(self, results, metrics=('accuracy', 'f1_score', 'roc_auc')):
         """
         Plot density plots for specified metrics.
@@ -24,7 +35,8 @@ class Plotter:
             if i == 0:
                 ax.legend()
         plt.tight_layout()
-        plt.show()
+        self.save_plot()
+
 
     def plot_evaluation_metric_over_replications(self, all_metric_results, title, metric_name):
         """
@@ -43,7 +55,7 @@ class Plotter:
         plt.xlabel('Replication')
         plt.ylabel(metric_name)
         plt.legend()
-        plt.show()
+        self.save_plot()
 
     def plot_confusion_matrices(self, confusion_matrices):
         """
@@ -58,7 +70,7 @@ class Plotter:
             plt.title(f'Average Confusion Matrix: {model_name}')
             plt.xlabel('Predicted label')
             plt.ylabel('True label')
-            plt.show()
+            self.save_plot()
 
     def print_best_parameters(self, results):
         """
@@ -71,3 +83,10 @@ class Plotter:
             model_results = results[results['model'] == model_name]
             best_params_list = model_results['best_params'].value_counts().index[0]
             print(f"Most frequently chosen best parameters for {model_name}: {best_params_list}")
+
+    def save_plot(self):
+        # Save the plot to a file
+        plot_path = os.path.join(self.output_dir, f'plot_{self.plot_counter}.png')
+        plt.savefig(plot_path)
+        plt.close()  # Close the plot to release memory
+        self.plot_counter += 1  # Increment the plot counter
